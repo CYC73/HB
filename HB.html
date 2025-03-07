@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>生日BUFF启动</title>
+    <style>
+        body { 
+            text-align: center; 
+            font-family: Arial, sans-serif; 
+            padding: 50px; 
+            background: linear-gradient(135deg, #ff9a9e, #fad0c4); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            overflow: hidden;
+            position: relative;
+        }
+        .container { 
+            width: 80vw; 
+            height: 80vh; 
+            padding: 20px; 
+            border-radius: 20px; 
+            background: rgba(255, 255, 255, 0.6); 
+            backdrop-filter: blur(15px); 
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); 
+            text-align: center; 
+            position: relative; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            justify-content: center; 
+            transition: transform 0.3s ease-in-out; }
+
+        .container:hover {
+            transform: scale(1.02); 
+        }
+        
+        button { 
+            padding: 12px 24px; 
+            font-size: 18px; 
+            cursor: pointer; 
+            border: none; 
+            border-radius: 8px; 
+            background: #ff6b81; 
+            color: white; 
+            transition: 0.3s; 
+            margin-top: 10px; 
+            margin-bottom: 10px;
+        }
+        button:hover { background: #ff4757; }
+        .hidden { display: none; }
+        h1 { color: #ff4757; font-size: 32px; margin-bottom: 10px; }
+        input { 
+            padding: 10px; 
+            font-size: 20px; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
+            margin-top: 10px; 
+            width: 60%; 
+            text-align: center; 
+        }
+        
+        .buff-boxes {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .buff-box { 
+            width: 100px; 
+            height: 100px; 
+            background: #ffcccb; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            border-radius: 10px; 
+            font-size: 24px; 
+            cursor: pointer; 
+            position: relative; 
+            transition: 0.3s; 
+        }
+        .buff-box:hover { transform: scale(1.1); }
+        .buff-box.cracked { animation: crackEffect 0.5s forwards; }
+
+        /*标题始终在上 */
+        .buff-title {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 28px;
+            font-weight: bold;
+            color: #f49a4b;
+            background: rgba(248, 217, 197, 0.7);
+            padding: 10px 20px;
+            border-radius: 10px;
+            z-index: 10;
+        }
+
+        .buff-container {
+            width: 100%;
+            margin-top: 20px; 
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        .buff-text {
+            display: block;
+            font-size: 16px;
+            color: #ff4757;
+            font-weight: bold;
+            margin: 8px 0;
+            margin-bottom:8px;
+            background: rgba(255, 204, 203, 0.5);
+            padding: 10px;
+            border-radius: 10px;
+            width: 80%;
+            text-align: center;
+            align-items: center;
+        }
+
+        .box{
+            margin-top: 90px;
+        }
+
+        .bubble-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .bubble {
+            position: absolute;
+            bottom: -100px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            opacity: 0.7;
+            animation: rise 10s infinite ease-in-out;
+            max-width: 100px;
+        }
+        @keyframes rise {
+            0% {
+                transform: translateY(0);
+                opacity: 0;
+            }
+            30% {
+                opacity: 0.8;
+            }
+            50% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100vh);
+                opacity: 0;
+            }
+        }
+
+        @keyframes crackEffect {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.5); opacity: 0.8; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+        
+    </style>
+</head>
+<body>
+    <!-- 主页：输入名字 -->
+    <div class="container" id="nameInputPage">
+        <h1>🎂 寿星确认站 🎂</h1>
+        <input type="text" id="userName" placeholder="你的名字">
+        <br><br>
+        <button onclick="confirmName()">确定</button>
+    </div>
+
+    <!-- 页面1：BUFF 激活 -->
+    <div class="container hidden" id="page1">
+        <h1 id="greeting">🎉 叮！就是你啦！ 快来领取你的生日buff礼包哈哈 🎉</h1>
+        <p>点击下方按钮，解锁你的专属生日BUFF！</p>
+        <button onclick="showPage('page2')">开启BUFF</button>
+    </div>
+
+    <!-- 页面2：BUFF 选择 -->
+    <div class="container hidden" id="page2">
+        <div class="buff-title">✨ 生日BUFF已解锁 ✨</div>
+
+        <p class="box">请点击buff盒子</p>
+        
+        <!-- BUFF 文字显示区 -->
+        <div class="buff-container" id="buffContainer"></div>
+
+        <div class="buff-boxes">
+            <div class="buff-box" onclick="crackBox(this, '🪂🫀🧸\u00A0\u00A0   别忘了享受闲，让自己处在健康的状态，做任何事都“有心有力”！😎 \u00A0\u00A0 🎧🎬🏃‍♀️')">💪</div>
+            <div class="buff-box" onclick="crackBox(this, '🫶🏼💃🏼🤹🏼‍♀️\u00A0\u00A0  每天都有积极的心态，享受生活！😁 \u00A0\u00A0 🌻🔥🍃 ')">🤩</div>
+            <div class="buff-box" onclick="crackBox(this, '💦✍️💯\u00A0\u00A0  达到自己理想的目标/成绩！(虽然学医过程艰难，但我相信你一定可以守得云开见天明)😊 \u00A0\u00A0 ☁️⛅️☀️')">👩‍⚕️</div>
+            <div class="buff-box" onclick="crackBox(this, '🍜🍲🧋\u00A0\u00A0  尝遍各种好吃的，吃到自己想吃的美食😋 \u00A0\u00A0 🌭🍻🍕')">🍽️</div>
+            <div class="buff-box" onclick="crackBox(this, '🫧⛳️✅\u00A0\u00A0  烦恼达咩，做任何事情都能游刃有余，更好的掌握自己生活走向！😆 \u00A0\u00A0 🌠🐦‍🔥👌  ')">🪁</div>
+        </div>
+        
+        <br>
+        <button onclick="showPage('page3')">生日快乐！</button>
+    </div>
+
+    <!-- 页面3：最终祝福 -->
+    <div class="container hidden" id="page3">
+        <h1>🎊 生日快乐！ 🎊</h1>
+        <p class="surprise">💖 有什么事都可以分享给我哦hehe！💖</p>
+        <img src="HB.png" alt="生日快乐" width="300">
+        <br>
+        <button onclick="showPage('page1')">返回首页</button>
+    </div>
+
+    <div class="bubble-container" id="bubbleContainer"></div>
+
+    <script>
+        // 输入名字并进入页面 1
+        function confirmName() {
+            let name = document.getElementById("userName").value;
+            if (name.trim() !== "") {
+                document.getElementById("greeting").innerHTML = `🩵 叮！${name}，就是你啦！ 快来领取你的生日buff礼包哈哈哈！ 🩵`;
+                showPage('page1');
+            } else {
+                alert("请输入你的名字！");
+            }
+        }
+
+        // 页面切换
+        function showPage(pageId) {
+            document.querySelectorAll('.container').forEach(div => div.classList.add('hidden'));
+            document.getElementById(pageId).classList.remove('hidden');
+        }
+
+        // 选择 BUFF
+        function crackBox(element, buffMessage) {
+            element.classList.add('cracked');
+
+            let buffContainer = document.getElementById("buffContainer");
+
+            // 创建新的 BUFF 文字
+            let buffText = document.createElement("div");
+            buffText.classList.add("buff-text");
+            buffText.innerHTML = buffMessage;
+
+            buffContainer.appendChild(buffText);
+        }
+
+        function createBubbles() {
+            const container = document.getElementById("bubbleContainer");
+            const bubbleColors = ["#FFC0CB", "#FF69B4", "#FFD700", "#87CEFA", "#FFFFFF", "#DDA0DD", "#F08080", "#E6E6FA"];
+            for (let i = 0; i < 20; i++) {
+                let bubble = document.createElement("div");
+                bubble.classList.add("bubble");
+                let size = Math.random() * 60 + 20;
+                bubble.style.width = `${size}px`;
+                bubble.style.height = `${size}px`;
+                bubble.style.left = `${Math.random() * 100}vw`;
+                bubble.style.background = bubbleColors[Math.floor(Math.random() * bubbleColors.length)];
+                bubble.style.animationDuration = `${Math.random() * 5 + 5}s`;
+                container.appendChild(bubble);
+            }
+        }
+        createBubbles();
+    </script>
+</body>
+</html>
